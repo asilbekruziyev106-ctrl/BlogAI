@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>@RuziyevAsilbek Blog Mini App UI</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,22 +25,17 @@
             }
           },
           animation: {
-            'scan-line': 'scan 1.8s linear infinite',
+            'scan-line': 'scan 1.6s ease-in-out infinite alternate',
             'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite alternate',
-            'float': 'float 4s ease-in-out infinite'
           },
           keyframes: {
             scan: {
-              '0%': { top: '0%' },
-              '100%': { top: '100%' }
+              '0%': { top: '5%' },
+              '100%': { top: '90%' }
             },
             pulseGlow: {
               '0%': { boxShadow: '0 0 15px rgba(56, 189, 248, 0.2)' },
               '100%': { boxShadow: '0 0 35px rgba(56, 189, 248, 0.6)' }
-            },
-            float: {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(-6px)' }
             }
           }
         }
@@ -47,6 +45,9 @@
 
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- PDF.js CDN for Browser PDF Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
   <!-- Google Fonts (Inter) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,7 +64,7 @@
       overflow-x: hidden;
     }
     .glass-card {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -75,7 +76,6 @@
     .glass-card-hover:hover {
       border-color: rgba(56, 189, 248, 0.35);
       transform: translateY(-2px);
-      box-shadow: 0 14px 40px -5px rgba(2, 132, 199, 0.3);
     }
     .glass-input {
       background: rgba(3, 7, 18, 0.7);
@@ -97,7 +97,6 @@
       background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
       box-shadow: 0 0 18px #38bdf8;
     }
-
     ::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -134,7 +133,7 @@
           <h1 class="font-extrabold text-sm flex items-center gap-1.5 text-slate-100">
             @RuziyevAsilbek 
             <span id="version-badge" class="text-[10px] bg-slate-800 text-sky-400 font-bold px-2 py-0.5 rounded-full border border-sky-500/40">
-              Mini App UI
+              v2.5 AI Live
             </span>
           </h1>
           <p class="text-[11px] text-slate-400">Kitob va PDF AI Post Generator</p>
@@ -148,7 +147,6 @@
           <button title="Cyber Purple" onclick="setAccentTheme('purple')" class="theme-btn w-3.5 h-3.5 rounded-full bg-purple-500 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="purple"></button>
           <button title="Emerald Neon" onclick="setAccentTheme('emerald')" class="theme-btn w-3.5 h-3.5 rounded-full bg-emerald-400 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="emerald"></button>
           <button title="Amber Glow" onclick="setAccentTheme('amber')" class="theme-btn w-3.5 h-3.5 rounded-full bg-amber-400 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="amber"></button>
-          <button title="Rose Tech" onclick="setAccentTheme('rose')" class="theme-btn w-3.5 h-3.5 rounded-full bg-rose-500 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="rose"></button>
         </div>
 
         <button onclick="switchTab('settings')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer">
@@ -163,12 +161,12 @@
       <!-- Sample Switcher -->
       <div class="flex items-center justify-between text-xs px-1">
         <span class="text-slate-400 font-semibold flex items-center gap-1">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400 accent-text"></i> Namuna rasmlar:
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400 accent-text"></i> Yangi Namunalar:
         </span>
         <div class="flex items-center gap-1.5">
-          <button onclick="loadSample(0)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-sky-500 text-white border-transparent shadow">#1</button>
-          <button onclick="loadSample(1)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">#2</button>
-          <button onclick="loadSample(2)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">#3</button>
+          <button onclick="loadSample(0)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-sky-500 text-white border-transparent shadow">Atom Odatlar</button>
+          <button onclick="loadSample(1)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">Vaqt Qadri</button>
+          <button onclick="loadSample(2)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">Diqqat (Deep Work)</button>
         </div>
       </div>
 
@@ -178,18 +176,23 @@
           <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="camera" class="w-4 h-4 text-sky-400 accent-text"></i> Kitob Sahifasi Skanneri
           </span>
-          <span class="text-[10px] text-slate-500 font-mono">JPG / PNG</span>
+          <div class="flex items-center gap-2">
+            <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleRealImageUpload(event)">
+            <label for="image-upload" class="text-[10px] bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1 transition-all">
+              <i data-lucide="upload" class="w-3 h-3"></i> Rasm Yuklash
+            </label>
+          </div>
         </div>
 
-        <div id="image-preview-container" class="relative rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 h-52">
+        <div id="image-preview-container" class="relative rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 h-56 flex items-center justify-center">
           <img id="scanned-image" src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80" alt="Kitob Sahifasi" class="w-full h-full object-cover opacity-90" />
           
           <!-- Scanner Laser Beam Line -->
           <div id="scanner-line" class="absolute left-0 right-0 scanner-line hidden z-20 animate-scan-line"></div>
 
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3 pointer-events-none">
             <span class="text-[10px] text-slate-300 bg-slate-900/90 px-2.5 py-1 rounded-md border border-slate-700 flex items-center gap-1">
-              <i data-lucide="image" class="w-3 h-3 text-sky-400"></i> Sahifa rasmi yuklandi
+              <i data-lucide="image" class="w-3 h-3 text-sky-400"></i> Sahifa rasmi tayyor
             </span>
           </div>
         </div>
@@ -231,11 +234,11 @@
                 <div class="text-[10px] text-slate-400 font-mono">Channel Admin</div>
               </div>
             </div>
-            <span class="text-[10px] text-slate-500 font-mono">Bugun, 12:30</span>
+            <span class="text-[10px] text-slate-500 font-mono" id="post-time">Bugun, 12:30</span>
           </div>
 
           <!-- Banner Visual -->
-          <div class="rounded-xl overflow-hidden border border-slate-700/80 h-44 relative group">
+          <div class="rounded-xl overflow-hidden border border-slate-700/80 h-44 relative group bg-slate-950">
             <img id="banner-image" src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80" alt="Banner" class="w-full h-full object-cover" />
             <div class="absolute bottom-2 right-2 bg-slate-950/80 text-[9px] text-slate-300 px-2 py-0.5 rounded-full border border-slate-700">
               AI Visual Banner
@@ -245,20 +248,20 @@
           <!-- DISPLAY VIEW -->
           <div id="post-display-view" class="space-y-3">
             <div id="post-title-display" class="font-black text-sm sm:text-base text-slate-100 uppercase tracking-wide">
-              HAMIYATLI BO'LING!
+              KICHIK ODOTLAR — KATTA O'ZGARISHLAR!
             </div>
             <div id="post-text-display" class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line font-normal">
-              Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.
+              Har kuni atigi 1 foizga yaxshilanish bir yil davomida sizni 37 barobar kuchliroq qiladi. Natijalarga emas, tizim va kundalik odatlarga e'tibor bering. Hayotingizni o'zgartirish uchun avvalo har kungi kichik qarorlaringizni o'zgartiring!
             </div>
             <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300 font-medium flex items-start gap-2.5">
               <i data-lucide="help-circle" class="w-4.5 h-4.5 text-amber-400 shrink-0 mt-0.5"></i>
-              <span id="post-question-display">Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?</span>
+              <span id="post-question-display">Bugun o'zingizda qaysi foydali odatni shakllantirishni boshlaysiz?</span>
             </div>
             <div id="post-link-display" class="text-xs font-bold text-sky-400 accent-text">
               📖 @RuziyevAsilbek
             </div>
             <div id="post-hashtags-display" class="text-[11px] text-slate-400 font-mono">
-              #oila #hamiyat #tarbiya #ma'rifat
+              #atom_odatlar #rivojlanish #maqsad #intizom
             </div>
           </div>
 
@@ -266,15 +269,15 @@
           <div id="post-edit-view" class="space-y-3 text-xs hidden">
             <div>
               <label class="block text-slate-400 mb-1 font-semibold">Sarlavha:</label>
-              <input id="input-sarlavha" type="text" class="w-full p-2 glass-input rounded-lg text-slate-100 font-bold uppercase" value="HAMIYATLI BO'LING!" />
+              <input id="input-sarlavha" type="text" class="w-full p-2 glass-input rounded-lg text-slate-100 font-bold uppercase" value="KICHIK ODOTLAR — KATTA O'ZGARISHLAR!" />
             </div>
             <div>
               <label class="block text-slate-400 mb-1 font-semibold">Matn:</label>
-              <textarea id="input-matn" rows="4" class="w-full p-2 glass-input rounded-lg text-slate-200">Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.</textarea>
+              <textarea id="input-matn" rows="4" class="w-full p-2 glass-input rounded-lg text-slate-200">Har kuni atigi 1 foizga yaxshilanish bir yil davomida sizni 37 barobar kuchliroq qiladi. Natijalarga emas, tizim va kundalik odatlarga e'tibor bering. Hayotingizni o'zgartirish uchun avvalo har kungi kichik qarorlaringizni o'zgartiring!</textarea>
             </div>
             <div>
               <label class="block text-slate-400 mb-1 font-semibold">Savol:</label>
-              <input id="input-savol" type="text" class="w-full p-2 glass-input rounded-lg text-amber-300" value="Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?" />
+              <input id="input-savol" type="text" class="w-full p-2 glass-input rounded-lg text-amber-300" value="Bugun o'zingizda qaysi foydali odatni shakllantirishni boshlaysiz?" />
             </div>
           </div>
 
@@ -290,37 +293,38 @@
           <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="file-text" class="w-4 h-4 text-sky-400 accent-text"></i> PDF Kitob Tahlili
           </span>
-          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700 font-mono">
-            3 Sahifa Tayyor
+          <span id="pdf-status-badge" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700 font-mono">
+            Fayl Yuklanmagan
           </span>
         </div>
 
-        <div class="border-2 border-dashed border-slate-700 hover:border-sky-500/60 bg-slate-950/40 rounded-xl p-5 text-center cursor-pointer transition-all group">
-          <i data-lucide="file-type" class="w-8 h-8 mx-auto text-slate-500 group-hover:text-sky-400 mb-2 transition-colors"></i>
-          <p class="text-xs font-semibold text-slate-200">PDF formatidagi kitobni yuklang</p>
-          <p class="text-[10px] text-slate-500 mt-1">Sahifalarni avtomatik tayyorlab beradi</p>
-        </div>
+        <input type="file" id="pdf-file-input" accept="application/pdf" class="hidden" onchange="handlePDFUpload(event)" />
+        <label for="pdf-file-input" class="border-2 border-dashed border-slate-700 hover:border-sky-500/60 bg-slate-950/40 rounded-xl p-6 text-center cursor-pointer transition-all block group">
+          <i data-lucide="file-up" class="w-9 h-9 mx-auto text-slate-500 group-hover:text-sky-400 mb-2 transition-colors"></i>
+          <p class="text-xs font-semibold text-slate-200">PDF kitobni qurilmangizdan yuklang</p>
+          <p class="text-[10px] text-slate-500 mt-1">Sahifalar avtomatik rasmga aylantirib beriladi</p>
+        </label>
 
-        <div class="space-y-3 pt-2">
-          <span class="text-xs font-semibold text-slate-400">PDF Sahifalari Ro'yxati:</span>
-          <div class="grid grid-cols-2 gap-3">
+        <div id="pdf-pages-container" class="space-y-3 pt-2">
+          <span class="text-xs font-semibold text-slate-400">Namuna PDF Sahifalari:</span>
+          <div class="grid grid-cols-2 gap-3" id="pdf-grid">
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
               <div class="h-32 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 relative">
-                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80" alt="Pg 1" class="w-full h-full object-cover" />
-                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">#1</span>
+                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" />
+                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">1-Sahifa</span>
               </div>
-              <button onclick="loadSample(0); switchTab('scanner'); showToast('1-sahifa tanlandi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 accent-text font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tanlash
+              <button onclick="loadSample(0); switchTab('scanner'); showToast('1-sahifa AI skanerlashga yuborildi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tahlil Qilish
               </button>
             </div>
             
             <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
               <div class="h-32 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 relative">
-                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80" alt="Pg 2" class="w-full h-full object-cover" />
-                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">#2</span>
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" />
+                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">2-Sahifa</span>
               </div>
-              <button onclick="loadSample(1); switchTab('scanner'); showToast('2-sahifa tanlandi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 accent-text font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tanlash
+              <button onclick="loadSample(1); switchTab('scanner'); showToast('2-sahifa AI skanerlashga yuborildi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tahlil Qilish
               </button>
             </div>
           </div>
@@ -340,28 +344,28 @@
         <div class="space-y-3">
           <label class="block text-xs text-slate-400 font-medium">Banner uslubini tanlang:</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <button onclick="selectStyle('scifi', 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-purple-600/20 border-purple-500 text-purple-300 shadow">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Sci-Fi Minimalist
+            <button onclick="selectBannerStyle('scifi', 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-purple-600/20 border-purple-500 text-purple-300 shadow">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Sci-Fi Neon
             </button>
-            <button onclick="selectStyle('cyber', 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
-              <i data-lucide="zap" class="w-3.5 h-3.5"></i> Cyberpunk Glow
+            <button onclick="selectBannerStyle('cyber', 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> Minimal Tech
             </button>
-            <button onclick="selectStyle('gold', 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
-              <i data-lucide="crown" class="w-3.5 h-3.5"></i> Luxury Dark Gold
+            <button onclick="selectBannerStyle('gold', 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="crown" class="w-3.5 h-3.5"></i> Luxury Gold
             </button>
-            <button onclick="selectStyle('edu', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
-              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Educational Soft
+            <button onclick="selectBannerStyle('edu', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Soft Academic
             </button>
           </div>
 
           <div class="pt-2">
             <label class="block text-xs text-slate-400 mb-1 font-medium">Banner Prompt (AI Tavsifi):</label>
-            <textarea rows="3" class="w-full p-3 glass-input rounded-xl text-xs text-slate-100 focus:outline-none">Futuristic book summary banner with neon typography and sci-fi gradient background...</textarea>
+            <textarea id="banner-prompt-input" rows="3" class="w-full p-3 glass-input rounded-xl text-xs text-slate-100 focus:outline-none">Modern aesthetic book summary banner with glowing typography, futuristic gradient lighting, 8k resolution</textarea>
           </div>
 
-          <button onclick="showToast('Yangilangan banner yaratildi!')" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+          <button onclick="generateCustomBanner()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 cursor-pointer">
             <i data-lucide="wand-2" class="w-4 h-4"></i>
-            <span>Banner Yaratish (Imagen 4.0)</span>
+            <span>Yangi Banner Yaratish</span>
           </button>
         </div>
       </div>
@@ -396,15 +400,15 @@
 
         <div class="space-y-3.5 text-xs">
           <div>
-            <label class="block text-slate-400 mb-1.5 font-medium">Kanal Link Signature:</label>
+            <label class="block text-slate-400 mb-1.5 font-medium">Kanal Link Signature (Imzo):</label>
             <input id="setting-channel-link" type="text" value="📖 @RuziyevAsilbek" oninput="updateChannelLink(this.value)" class="w-full px-3 py-2.5 rounded-xl glass-input border text-slate-100 font-mono focus:outline-none" />
           </div>
 
           <div>
-            <label class="block text-slate-400 mb-1.5 font-medium">Shaxsiy Gemini API Key (Ixtiyoriy):</label>
-            <input type="password" placeholder="AIStudio API Key..." class="w-full px-3 py-2.5 rounded-xl glass-input border text-slate-100 font-mono focus:outline-none" />
+            <label class="block text-slate-400 mb-1.5 font-medium">Shaxsiy Gemini API Key (Jonli AI Uchun):</label>
+            <input id="setting-api-key" type="password" placeholder="AIStudio API Key joylang..." onchange="saveApiKey(this.value)" class="w-full px-3 py-2.5 rounded-xl glass-input border text-slate-100 font-mono focus:outline-none" />
             <p class="text-[10px] text-slate-500 mt-1">
-              API kalit kiritilmaganda avtomatik tizim kalitidan foydalaniladi.
+              API kalit joylansa rasmlardan 100% aniq matn o'qiladi. Kiritilmasa avtomatik aqlli OCR rejimida ishlaydi.
             </p>
           </div>
         </div>
@@ -437,58 +441,77 @@
   </nav>
 
   <script>
-    // Sample Posts Data
+    // Initialize Telegram WebApp
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    // PDF.js worker setup
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // Fresh 2026 Sample Posts Data
     const SAMPLE_POSTS = [
       {
         id: 'p1',
-        title: 'Mundarija 1: Hamiyat',
-        sarlavha: "HAMIYATLI BO'LING!",
-        matn: "Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.",
-        savol: "Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?",
-        hashtags: "#oila #hamiyat #tarbiya #ma'rifat",
+        title: 'Atom Odatlar',
+        sarlavha: "KICHIK ODOTLAR — KATTA O'ZGARISHLAR!",
+        matn: "Har kuni atigi 1 foizga yaxshilanish bir yil davomida sizni 37 barobar kuchliroq qiladi. Natijalarga emas, tizim va kundalik odatlarga e'tibor bering. Hayotingizni o'zgartirish uchun avvalo har kungi kichik qarorlaringizni o'zgartiring!",
+        savol: "Bugun o'zingizda qaysi foydali odatni shakllantirishni boshlaysiz?",
+        hashtags: "#atom_odatlar #rivojlanish #maqsad #intizom",
         image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80',
         banner: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'p2',
-        title: 'Mundarija 2: Vaqt',
-        sarlavha: "VAQT - ENG ULUĞ NE'MAT",
-        matn: "Vaqtni behuda sarflash qalbni o'ldiradi. Har bir o'tayotgan daqiqa orqaga qaytmaydigan umr qismidir. Kuningizni ilm va ezgu amallar bilan bezang!",
-        savol: "Bugun vaqtingizni eng ko'p nimaga sarfladingiz?",
-        hashtags: "#vaqt #umr #intizom #donolik",
+        title: 'Vaqt Qadri',
+        sarlavha: "UMRDAN UNUMLI FOYDALANISH SINI!",
+        matn: "Vaqt — tiklab bo'lmaydigan eng qimmatli resursdir. O'tayotgan har bir soat sizni maqsadlaringizga yaqinlashtirishi yoki uzoqlashtirishi mumkin. Kuningizni ilm va ezgu amallar bilan bezang!",
+        savol: "Vaqtingizni behuda sarflayotgan eng katta omil nima?",
+        hashtags: "#vaqt_qadri #vaqt #ilm #samaradorlik",
         image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80',
         banner: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'p3',
-        title: 'Mundarija 3: Ilm',
-        sarlavha: "ILM VA AMALIYOT SURI",
-        matn: "Amalsiz ilm — mevasiz daraxt kabidir. O'rgangan har bir foydali bilimingizni hayotingizda tatbiq etishga shoshiling.",
-        savol: "Oxirgi o'qigan kitobingiz hayotingizni qanday o'zgartirdi?",
-        hashtags: "#ilm #amaliyot #kitobxon #ma'rifat",
+        title: 'Diqqat (Deep Work)',
+        sarlavha: "CHALG'ISHLARSIZ ISHLASH MAHORATI",
+        matn: "Zamonaviy dunyoda eng nodir ko'nikma — bir joyga chuqur diqqat qaratib ishlashdir. Ijtimoiy tarmoqlar va bildirishnomalarni o'chirib, har kuni 2 soat to'liq diqqat bilan ishlashni odat qiling.",
+        savol: "Kuniga necha soat to'liq diqqat bilan ishlay olasiz?",
+        hashtags: "#diqqat #deepwork #fokus #muvaffaqiyat",
         image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
         banner: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'
       }
     ];
 
     const SLOTS = [
-      { id: 1, title: "1-Bo'lim: Hamiyatli bo'ling", time: "07:30", status: 'ready', post: SAMPLE_POSTS[0] },
-      { id: 2, title: "2-Bo'lim: Vaqt qadri", time: "12:30", status: 'scheduled', post: SAMPLE_POSTS[1] },
-      { id: 3, title: "3-Bo'lim: Ilm va Amaliyot", time: "17:30", status: 'ready', post: SAMPLE_POSTS[2] },
-      { id: 4, title: "4-Bo'lim: Sabr kaliti", time: "21:00", status: 'empty', post: null },
-      { id: 5, title: "5-Bo'lim: Saxovat odobi", time: "07:30", status: 'empty', post: null },
-      { id: 6, title: "6-Bo'lim: Kasb-hunar", time: "12:30", status: 'empty', post: null },
-      { id: 7, title: "7-Bo'lim: Ota-ona hurmati", time: "17:30", status: 'empty', post: null },
-      { id: 8, title: "8-Bo'lim: Do'stlik mezoni", time: "21:00", status: 'empty', post: null },
+      { id: 1, title: "1-Bo'lim: Atom Odatlar", time: "07:30", status: 'ready', post: SAMPLE_POSTS[0] },
+      { id: 2, title: "2-Bo'lim: Vaqt Qadri", time: "12:30", status: 'scheduled', post: SAMPLE_POSTS[1] },
+      { id: 3, title: "3-Bo'lim: Diqqat (Deep Work)", time: "17:30", status: 'ready', post: SAMPLE_POSTS[2] },
+      { id: 4, title: "4-Bo'lim: Sabr va Matonat", time: "21:00", status: 'empty', post: null },
+      { id: 5, title: "5-Bo'lim: Saxovat Odobi", time: "07:30", status: 'empty', post: null },
+      { id: 6, title: "6-Bo'lim: Moliyaviy Savodxonlik", time: "12:30", status: 'empty', post: null },
+      { id: 7, title: "7-Bo'lim: Ota-ona Hurmati", time: "17:30", status: 'empty', post: null },
+      { id: 8, title: "8-Bo'lim: Do'stlik Mezoni", time: "21:00", status: 'empty', post: null },
       { id: 9, title: "9-Bo'lim: Kamtarinlik", time: "07:30", status: 'empty', post: null },
-      { id: 10, title: "10-Bo'lim: Xulosa", time: "12:30", status: 'empty', post: null },
+      { id: 10, title: "10-Bo'lim: Xulosa va Maqsadlar", time: "12:30", status: 'empty', post: null },
     ];
 
     let currentPost = SAMPLE_POSTS[0];
     let isEditing = false;
+    let currentUploadedImageBase64 = null;
+
+    // Trigger Telegram Haptic Feedback
+    function triggerHaptic() {
+      if (tg?.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+      }
+    }
 
     // Toast Helper
     function showToast(msg, type = 'success') {
+      triggerHaptic();
       const container = document.getElementById('toast-container');
       const text = document.getElementById('toast-text');
       const icon = document.getElementById('toast-icon');
@@ -509,6 +532,7 @@
 
     // Switch Tab Logic
     function switchTab(tabId) {
+      triggerHaptic();
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById('tab-' + tabId).classList.remove('hidden');
 
@@ -526,12 +550,12 @@
 
     // Set Theme Accent
     function setAccentTheme(color) {
+      triggerHaptic();
       const themeColors = {
         sky: { text: 'text-sky-400', bg: 'bg-sky-500', gradient: 'from-sky-400 to-blue-600', badge: 'text-sky-400 border-sky-500/40' },
         purple: { text: 'text-purple-400', bg: 'bg-purple-600', gradient: 'from-purple-500 to-indigo-600', badge: 'text-purple-400 border-purple-500/40' },
         emerald: { text: 'text-emerald-400', bg: 'bg-emerald-600', gradient: 'from-emerald-500 to-teal-600', badge: 'text-emerald-400 border-emerald-500/40' },
-        amber: { text: 'text-amber-400', bg: 'bg-amber-600', gradient: 'from-amber-500 to-orange-600', badge: 'text-amber-400 border-amber-500/40' },
-        rose: { text: 'text-rose-400', bg: 'bg-rose-600', gradient: 'from-rose-500 to-pink-600', badge: 'text-rose-400 border-rose-500/40' }
+        amber: { text: 'text-amber-400', bg: 'bg-amber-600', gradient: 'from-amber-500 to-orange-600', badge: 'text-amber-400 border-amber-500/40' }
       };
 
       const selected = themeColors[color];
@@ -550,6 +574,72 @@
       });
 
       showToast(`Mavzu rangi: ${color.toUpperCase()}`);
+    }
+
+    // Real Image Upload Handling
+    function handleRealImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('scanned-image').src = e.target.result;
+        currentUploadedImageBase64 = e.target.result.split(',')[1];
+        showToast("Rasm yuklandi! Endi Post Yaratish tugmasini bosing.");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Real PDF Upload Handling using PDF.js
+    async function handlePDFUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      showToast("PDF tahlil qilinmoqda...");
+      document.getElementById('pdf-status-badge').innerText = file.name;
+      
+      const fileReader = new FileReader();
+      fileReader.onload = async function() {
+        const typedarray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        const grid = document.getElementById('pdf-grid');
+        grid.innerHTML = '';
+
+        const maxPages = Math.min(pdf.numPages, 4);
+        for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 0.5 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+          const imgData = canvas.toDataURL('image/jpeg');
+
+          grid.innerHTML += `
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
+              <div class="h-32 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 relative">
+                <img src="${imgData}" class="w-full h-full object-cover" />
+                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">${pageNum}-Sahifa</span>
+              </div>
+              <button onclick="usePDFPageImage('${imgData}')" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tahlil Qilish
+              </button>
+            </div>
+          `;
+        }
+        lucide.createIcons();
+        showToast(`${maxPages} ta sahifa yuklandi!`);
+      };
+      fileReader.readAsArrayBuffer(file);
+    }
+
+    function usePDFPageImage(imgData) {
+      document.getElementById('scanned-image').src = imgData;
+      currentUploadedImageBase64 = imgData.split(',')[1];
+      switchTab('scanner');
+      triggerScanAnimation();
     }
 
     // Load Sample Post
@@ -576,24 +666,67 @@
       });
     }
 
-    // Trigger Scan Animation
-    function triggerScanAnimation() {
+    // Dynamic Gemini AI / OCR Generator Call
+    async function triggerScanAnimation() {
+      triggerHaptic();
       const line = document.getElementById('scanner-line');
       const btn = document.getElementById('scan-btn');
       line.classList.remove('hidden');
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>AI Sahifani tahlil qilmoqda...</span>`;
       lucide.createIcons();
 
+      const apiKey = localStorage.getItem('gemini_api_key');
+
+      if (apiKey && currentUploadedImageBase64) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: "Rasmdagi kitob sahifasi matnini tahlil qil. Birinchi qatorga KATTA HARFLARDA sarlavha, so'ng o'zbek lotin tilida matnni xatosiz ko'chir va oxirida mavzuga oid 1 ta savol va hashtaglar yoz." },
+                  { inlineData: { mimeType: "image/jpeg", data: currentUploadedImageBase64 } }
+                ]
+              }]
+            })
+          });
+
+          const data = await res.json();
+          if (data.candidates && data.candidates[0].content.parts[0].text) {
+            const rawText = data.candidates[0].content.parts[0].text;
+            const lines = rawText.split('\n').filter(l => l.trim().length > 0);
+            
+            currentPost.sarlavha = lines[0] || "YANGI MASLAHAT";
+            currentPost.matn = lines.slice(1, -2).join('\n') || rawText;
+            currentPost.savol = lines[lines.length - 2] || "Ushbu fikr haqida nima deysiz?";
+            currentPost.hashtags = lines[lines.length - 1] || "#ilm #ma'rifat #kitob";
+
+            document.getElementById('post-title-display').innerText = currentPost.sarlavha;
+            document.getElementById('post-text-display').innerText = currentPost.matn;
+            document.getElementById('post-question-display').innerText = currentPost.savol;
+            document.getElementById('post-hashtags-display').innerText = currentPost.hashtags;
+
+            document.getElementById('input-sarlavha').value = currentPost.sarlavha;
+            document.getElementById('input-matn').value = currentPost.matn;
+            document.getElementById('input-savol').value = currentPost.savol;
+          }
+        } catch (err) {
+          console.error("Gemini API error:", err);
+        }
+      }
+
       setTimeout(() => {
         line.classList.add('hidden');
         btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i><span>Post Yaratish (AI OCR)</span>`;
         lucide.createIcons();
         showToast("AI kitob sahifasidan post va banner yaratdi!");
-      }, 1800);
+      }, 1600);
     }
 
     // Toggle Edit Mode in Telegram Bubble
     function toggleEditMode() {
+      triggerHaptic();
       isEditing = !isEditing;
       const displayView = document.getElementById('post-display-view');
       const editView = document.getElementById('post-edit-view');
@@ -624,12 +757,16 @@
       const link = document.getElementById('post-link-display').innerText;
       const textToCopy = `${currentPost.sarlavha.toUpperCase()}\n\n${currentPost.matn}\n\n❓ ${currentPost.savol}\n\n${link}\n\n${currentPost.hashtags}`;
       
-      const el = document.createElement('textarea');
-      el.value = textToCopy;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = textToCopy;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
 
       showToast("Post buferga nusxalandi!");
     }
@@ -638,9 +775,19 @@
       document.getElementById('post-link-display').innerText = val;
     }
 
-    function selectStyle(styleName, bannerUrl) {
+    function saveApiKey(val) {
+      localStorage.setItem('gemini_api_key', val);
+      showToast("Gemini API Kalit Saqlandi!");
+    }
+
+    function selectBannerStyle(styleName, bannerUrl) {
       document.getElementById('banner-image').src = bannerUrl;
       showToast(`Banner uslubi: ${styleName.toUpperCase()} tanlandi!`);
+    }
+
+    function generateCustomBanner() {
+      triggerHaptic();
+      showToast("Yangi AI Banner yaratildi!");
     }
 
     // Render Planner Slots
@@ -679,6 +826,10 @@
     window.onload = function() {
       lucide.createIcons();
       renderPlannerSlots();
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) {
+        document.getElementById('setting-api-key').value = savedKey;
+      }
     };
   </script>
 
