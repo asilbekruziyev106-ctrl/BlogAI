@@ -42,7 +42,8 @@ def process_image_with_gemini(image_bytes):
     Rasm yoki PDF sahifasidan matn o'qiydi, sarlavhani ajratadi,
     o'zidan gap qo'shmasdan lotincha matn va postga oid savol yaratadi.
     """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    # Google API rasmiy o'rnini bosuvchi gemini-2.5-flash modelidan foydalanamiz
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     
     base64_img = base64.b64encode(image_bytes).decode('utf-8')
 
