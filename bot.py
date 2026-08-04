@@ -9,40 +9,14 @@ import fitz  # PyMuPDF library PDF fayllar uchun
 import telebot
 
 # ---------------------------------------------------------------------------
-# RENDER.COM UCHUN SOG'LIQNI TEKSHIRISH (HEALTH CHECK) PORT SERVERI
-# ---------------------------------------------------------------------------
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"OK - Bot is running live!")
-
-def start_health_check_server():
-    port = int(os.getenv("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
-    server.serve_forever()
-
-# Render.com port skanerlashi uchun fonda veb-serverni ishga tushirish
-threading.Thread(target=start_health_check_server, daemon=True).start()
-
-# ---------------------------------------------------------------------------
-# SOZLAMALAR (Environment Variables orqali olinadi)
-# ---------------------------------------------------------------------------
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-CHANNEL_LINK = "📖 @RuziyevAsilbek"
-
-bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-
-# ---------------------------------------------------------------------------
-# GEMINI 2.5 FLASH API (OCR, Matn, Savol va Hashtag uchun)
+# GEMINI API (OCR, Matn, Savol va Hashtag uchun)
 # ---------------------------------------------------------------------------
 def process_image_with_gemini(image_bytes):
     """
     Rasm yoki PDF sahifasidan matn o'qiydi, sarlavhani ajratadi,
     o'zidan gap qo'shmasdan lotincha matn va postga oid savol yaratadi.
     """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={GEMINI_API_KEY}"
     
     base64_img = base64.b64encode(image_bytes).decode('utf-8')
 
@@ -106,11 +80,11 @@ def process_image_with_gemini(image_bytes):
         raise Exception(f"Gemini API xatoligi: {response.text}")
 
 # ---------------------------------------------------------------------------
-# IMAGEN 4.0 API (Banner Rasm Generatsiyasi)
+# IMAGEN API (Banner Rasm Generatsiyasi)
 # ---------------------------------------------------------------------------
 def generate_banner_image(prompt_text):
     """Sarlavhaga mos grafik banner yaratadi"""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={GEMINI_API_KEY}"
     payload = {
         "instances": [{"prompt": prompt_text}],
         "parameters": {"sampleCount": 1}
