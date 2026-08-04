@@ -2,9 +2,28 @@ import os
 import io
 import json
 import base64
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import requests
 import fitz  # PyMuPDF library PDF fayllar uchun
 import telebot
+
+# ---------------------------------------------------------------------------
+# RENDER.COM UCHUN SOG'LIQNI TEKSHIRISH (HEALTH CHECK) PORT SERVERI
+# ---------------------------------------------------------------------------
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK - Bot is running live!")
+
+def start_health_check_server():
+    port = int(os.getenv("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    server.serve_forever()
+
+# Render.com port skanerlashi uchun fonda veb-serverni ishga tushirish
+threading.Thread(target=start_health_check_server, daemon=True).start()
 
 # ---------------------------------------------------------------------------
 # SOZLAMALAR (Environment Variables orqali olinadi)
@@ -96,10 +115,13 @@ def generate_banner_image(prompt_text):
         "instances": [{"prompt": prompt_text}],
         "parameters": {"sampleCount": 1}
     }
-    response = requests.post(url, json=payload)
-    if response.status_code == 200:
-        bytes_b64 = response.json()['predictions'][0]['bytesBase64Encoded']
-        return base64.b64decode(bytes_b64)
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            bytes_b64 = response.json()['predictions'][0]['bytesBase64Encoded']
+            return base64.b64decode(bytes_b64)
+    except Exception:
+        pass
     return None
 
 # ---------------------------------------------------------------------------
@@ -137,7 +159,7 @@ def handle_photo(message):
 
         bot.delete_message(message.chat.id, status_msg.message_id)
 
-        # Banner kerak bo'lsa Imagen 4.0 orqali rasm yaratish
+        # Banner kerak bo'lsa Imagen orqali rasm yaratish
         if data.get('needsBanner') and data.get('bannerPrompt'):
             banner_status = bot.send_message(message.chat.id, "🎨 Sarlavhaga mos dizayn rasm yaratilmoqda...")
             banner_bytes = generate_banner_image(data['bannerPrompt'])
@@ -195,5 +217,5 @@ def handle_document(message):
         bot.reply_to(message, f"❌ PDF o'qishda xatolik: {str(e)}")
 
 if __name__ == "__main__":
-    print("Bot 7/24 rejimida ishga tushdi...")
+    print("Bot va Health Check server 7/24 rejimida ishga tushdi...")
     bot.infinity_polling()
