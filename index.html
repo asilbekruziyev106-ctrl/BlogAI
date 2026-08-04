@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>@RuziyevAsilbek Blog Mini App UI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0284c7',
+              600: '#0284c7',
+              900: '#0c4a6e',
+            }
+          },
+          animation: {
+            'scan-line': 'scan 1.8s linear infinite',
+            'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite alternate',
+            'float': 'float 4s ease-in-out infinite'
+          },
+          keyframes: {
+            scan: {
+              '0%': { top: '0%' },
+              '100%': { top: '100%' }
+            },
+            pulseGlow: {
+              '0%': { boxShadow: '0 0 15px rgba(56, 189, 248, 0.2)' },
+              '100%': { boxShadow: '0 0 35px rgba(56, 189, 248, 0.6)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #030712;
+      color: #f3f4f6;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px -5px rgba(2, 132, 199, 0.3);
+    }
+    .glass-input {
+      background: rgba(3, 7, 18, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .glass-input:focus {
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+      outline: none;
+    }
+    .telegram-bubble {
+      background: #17212b;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+    .scanner-line {
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
+      box-shadow: 0 0 18px #38bdf8;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.4);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-sky-500 selection:text-white pb-28">
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold hidden items-center gap-2 border transition-all animate-bounce">
+    <i id="toast-icon" data-lucide="check-circle-2" class="w-4 h-4"></i>
+    <span id="toast-text">Xabar</span>
+  </div>
+
+  <!-- Main Mobile Canvas Container -->
+  <div class="max-w-md mx-auto pt-3 px-3.5 space-y-4">
+    
+    <!-- Header Card -->
+    <header class="glass-card rounded-2xl p-3.5 flex items-center justify-between border shadow-xl relative overflow-hidden">
+      <div id="header-glow" class="absolute -right-8 -top-8 w-24 h-24 bg-gradient-to-br from-sky-400 to-blue-600 opacity-20 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="flex items-center gap-3">
+        <div id="app-logo" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-sky-500/25">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-sm flex items-center gap-1.5 text-slate-100">
+            @RuziyevAsilbek 
+            <span id="version-badge" class="text-[10px] bg-slate-800 text-sky-400 font-bold px-2 py-0.5 rounded-full border border-sky-500/40">
+              Mini App UI
+            </span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Kitob va PDF AI Post Generator</p>
+        </div>
+      </div>
+
+      <!-- Theme Accent Switcher -->
+      <div class="flex items-center gap-1.5">
+        <div class="flex items-center bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 gap-1.5 shadow-inner">
+          <button title="Sky Blue" onclick="setAccentTheme('sky')" class="theme-btn w-3.5 h-3.5 rounded-full bg-sky-400 transition-transform scale-125 ring-2 ring-white cursor-pointer" data-theme="sky"></button>
+          <button title="Cyber Purple" onclick="setAccentTheme('purple')" class="theme-btn w-3.5 h-3.5 rounded-full bg-purple-500 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="purple"></button>
+          <button title="Emerald Neon" onclick="setAccentTheme('emerald')" class="theme-btn w-3.5 h-3.5 rounded-full bg-emerald-400 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="emerald"></button>
+          <button title="Amber Glow" onclick="setAccentTheme('amber')" class="theme-btn w-3.5 h-3.5 rounded-full bg-amber-400 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="amber"></button>
+          <button title="Rose Tech" onclick="setAccentTheme('rose')" class="theme-btn w-3.5 h-3.5 rounded-full bg-rose-500 opacity-50 hover:opacity-100 transition-transform cursor-pointer" data-theme="rose"></button>
+        </div>
+
+        <button onclick="switchTab('settings')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB 1: SCANNER -->
+    <div id="tab-scanner" class="tab-content space-y-4">
+      
+      <!-- Sample Switcher -->
+      <div class="flex items-center justify-between text-xs px-1">
+        <span class="text-slate-400 font-semibold flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400 accent-text"></i> Namuna rasmlar:
+        </span>
+        <div class="flex items-center gap-1.5">
+          <button onclick="loadSample(0)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-sky-500 text-white border-transparent shadow">#1</button>
+          <button onclick="loadSample(1)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">#2</button>
+          <button onclick="loadSample(2)" class="sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">#3</button>
+        </div>
+      </div>
+
+      <!-- Upload Card with Laser Scan Line -->
+      <div class="glass-card glass-card-hover rounded-2xl p-4 space-y-3 relative">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="camera" class="w-4 h-4 text-sky-400 accent-text"></i> Kitob Sahifasi Skanneri
+          </span>
+          <span class="text-[10px] text-slate-500 font-mono">JPG / PNG</span>
+        </div>
+
+        <div id="image-preview-container" class="relative rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 h-52">
+          <img id="scanned-image" src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80" alt="Kitob Sahifasi" class="w-full h-full object-cover opacity-90" />
+          
+          <!-- Scanner Laser Beam Line -->
+          <div id="scanner-line" class="absolute left-0 right-0 scanner-line hidden z-20 animate-scan-line"></div>
+
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3">
+            <span class="text-[10px] text-slate-300 bg-slate-900/90 px-2.5 py-1 rounded-md border border-slate-700 flex items-center gap-1">
+              <i data-lucide="image" class="w-3 h-3 text-sky-400"></i> Sahifa rasmi yuklandi
+            </span>
+          </div>
+        </div>
+
+        <button id="scan-btn" onclick="triggerScanAnimation()" class="w-full py-3 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Post Yaratish (AI OCR)</span>
+        </button>
+      </div>
+
+      <!-- TELEGRAM REALISTIC BUBBLE MOCKUP -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Telegram Kanal Post Prevyusi
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button id="edit-toggle-btn" onclick="toggleEditMode()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-[11px] rounded-xl border border-slate-700 flex items-center gap-1 transition-colors cursor-pointer">
+              <i data-lucide="edit-3" class="w-3 h-3"></i>
+              <span id="edit-btn-text">Tahrirlash</span>
+            </button>
+            <button onclick="copyPostToClipboard()" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs rounded-xl shadow flex items-center gap-1.5 transition-colors cursor-pointer accent-bg">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Nusxalash
+            </button>
+          </div>
+        </div>
+
+        <div class="telegram-bubble p-4 space-y-3.5">
+          <!-- Channel Header -->
+          <div class="flex items-center justify-between border-b border-slate-700/50 pb-2.5">
+            <div class="flex items-center gap-2.5">
+              <div id="avatar-circle" class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                R
+              </div>
+              <div>
+                <div class="font-bold text-xs text-slate-100 flex items-center gap-1">
+                  Asilbek Ro'ziyev <i data-lucide="badge-check" class="w-3.5 h-3.5 text-sky-400"></i>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono">Channel Admin</div>
+              </div>
+            </div>
+            <span class="text-[10px] text-slate-500 font-mono">Bugun, 12:30</span>
+          </div>
+
+          <!-- Banner Visual -->
+          <div class="rounded-xl overflow-hidden border border-slate-700/80 h-44 relative group">
+            <img id="banner-image" src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80" alt="Banner" class="w-full h-full object-cover" />
+            <div class="absolute bottom-2 right-2 bg-slate-950/80 text-[9px] text-slate-300 px-2 py-0.5 rounded-full border border-slate-700">
+              AI Visual Banner
+            </div>
+          </div>
+
+          <!-- DISPLAY VIEW -->
+          <div id="post-display-view" class="space-y-3">
+            <div id="post-title-display" class="font-black text-sm sm:text-base text-slate-100 uppercase tracking-wide">
+              HAMIYATLI BO'LING!
+            </div>
+            <div id="post-text-display" class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line font-normal">
+              Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.
+            </div>
+            <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300 font-medium flex items-start gap-2.5">
+              <i data-lucide="help-circle" class="w-4.5 h-4.5 text-amber-400 shrink-0 mt-0.5"></i>
+              <span id="post-question-display">Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?</span>
+            </div>
+            <div id="post-link-display" class="text-xs font-bold text-sky-400 accent-text">
+              📖 @RuziyevAsilbek
+            </div>
+            <div id="post-hashtags-display" class="text-[11px] text-slate-400 font-mono">
+              #oila #hamiyat #tarbiya #ma'rifat
+            </div>
+          </div>
+
+          <!-- EDIT VIEW -->
+          <div id="post-edit-view" class="space-y-3 text-xs hidden">
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Sarlavha:</label>
+              <input id="input-sarlavha" type="text" class="w-full p-2 glass-input rounded-lg text-slate-100 font-bold uppercase" value="HAMIYATLI BO'LING!" />
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Matn:</label>
+              <textarea id="input-matn" rows="4" class="w-full p-2 glass-input rounded-lg text-slate-200">Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.</textarea>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1 font-semibold">Savol:</label>
+              <input id="input-savol" type="text" class="w-full p-2 glass-input rounded-lg text-amber-300" value="Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: PDF -->
+    <div id="tab-pdf" class="tab-content hidden space-y-4">
+      <div class="glass-card glass-card-hover rounded-2xl p-4 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-4 h-4 text-sky-400 accent-text"></i> PDF Kitob Tahlili
+          </span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700 font-mono">
+            3 Sahifa Tayyor
+          </span>
+        </div>
+
+        <div class="border-2 border-dashed border-slate-700 hover:border-sky-500/60 bg-slate-950/40 rounded-xl p-5 text-center cursor-pointer transition-all group">
+          <i data-lucide="file-type" class="w-8 h-8 mx-auto text-slate-500 group-hover:text-sky-400 mb-2 transition-colors"></i>
+          <p class="text-xs font-semibold text-slate-200">PDF formatidagi kitobni yuklang</p>
+          <p class="text-[10px] text-slate-500 mt-1">Sahifalarni avtomatik tayyorlab beradi</p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <span class="text-xs font-semibold text-slate-400">PDF Sahifalari Ro'yxati:</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
+              <div class="h-32 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 relative">
+                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80" alt="Pg 1" class="w-full h-full object-cover" />
+                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">#1</span>
+              </div>
+              <button onclick="loadSample(0); switchTab('scanner'); showToast('1-sahifa tanlandi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 accent-text font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tanlash
+              </button>
+            </div>
+            
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 space-y-2">
+              <div class="h-32 rounded-lg overflow-hidden border border-slate-800 bg-slate-900 relative">
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80" alt="Pg 2" class="w-full h-full object-cover" />
+                <span class="absolute top-1.5 left-1.5 bg-slate-950/80 text-[10px] text-slate-200 font-bold px-2 py-0.5 rounded border border-slate-700">#2</span>
+              </div>
+              <button onclick="loadSample(1); switchTab('scanner'); showToast('2-sahifa tanlandi!');" class="w-full py-1.5 bg-slate-900 hover:bg-slate-800 text-sky-400 accent-text font-bold text-[11px] rounded-lg border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                <i data-lucide="arrow-right" class="w-3 h-3"></i> Tanlash
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: BANNER -->
+    <div id="tab-banner" class="tab-content hidden space-y-4">
+      <div class="glass-card glass-card-hover rounded-2xl p-4 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="image" class="w-4 h-4 text-purple-400"></i> AI Visual Banner Generator
+          </span>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-xs text-slate-400 font-medium">Banner uslubini tanlang:</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="selectStyle('scifi', 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-purple-600/20 border-purple-500 text-purple-300 shadow">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Sci-Fi Minimalist
+            </button>
+            <button onclick="selectStyle('cyber', 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> Cyberpunk Glow
+            </button>
+            <button onclick="selectStyle('gold', 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="crown" class="w-3.5 h-3.5"></i> Luxury Dark Gold
+            </button>
+            <button onclick="selectStyle('edu', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80')" class="banner-style-btn p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-slate-950 border-slate-800 text-slate-400">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Educational Soft
+            </button>
+          </div>
+
+          <div class="pt-2">
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Banner Prompt (AI Tavsifi):</label>
+            <textarea rows="3" class="w-full p-3 glass-input rounded-xl text-xs text-slate-100 focus:outline-none">Futuristic book summary banner with neon typography and sci-fi gradient background...</textarea>
+          </div>
+
+          <button onclick="showToast('Yangilangan banner yaratildi!')" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+            <i data-lucide="wand-2" class="w-4 h-4"></i>
+            <span>Banner Yaratish (Imagen 4.0)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: PLANNER (10 SLOTS) -->
+    <div id="tab-planner" class="tab-content hidden space-y-4">
+      <div class="glass-card glass-card-hover rounded-2xl p-4 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i> Mundarija va Rejalashtirgich
+          </span>
+          <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">
+            3/10 Tayyor
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5" id="planner-slots-grid">
+          <!-- Dynamically populated slots -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SETTINGS -->
+    <div id="tab-settings" class="tab-content hidden space-y-4">
+      <div class="glass-card glass-card-hover rounded-2xl p-4 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="sliders" class="w-4 h-4 text-sky-400 accent-text"></i> App Sozlamalari
+          </span>
+        </div>
+
+        <div class="space-y-3.5 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1.5 font-medium">Kanal Link Signature:</label>
+            <input id="setting-channel-link" type="text" value="📖 @RuziyevAsilbek" oninput="updateChannelLink(this.value)" class="w-full px-3 py-2.5 rounded-xl glass-input border text-slate-100 font-mono focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1.5 font-medium">Shaxsiy Gemini API Key (Ixtiyoriy):</label>
+            <input type="password" placeholder="AIStudio API Key..." class="w-full px-3 py-2.5 rounded-xl glass-input border text-slate-100 font-mono focus:outline-none" />
+            <p class="text-[10px] text-slate-500 mt-1">
+              API kalit kiritilmaganda avtomatik tizim kalitidan foydalaniladi.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FLOATING BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-slate-800/80 px-3 py-2 flex items-center justify-around z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
+    <button onclick="switchTab('scanner')" id="nav-scanner" class="nav-btn flex flex-col items-center gap-1 text-[10px] font-semibold transition-all cursor-pointer text-sky-400 accent-text scale-110">
+      <i data-lucide="camera" class="w-5 h-5"></i>
+      <span>Rasm OCR</span>
+    </button>
+
+    <button onclick="switchTab('pdf')" id="nav-pdf" class="nav-btn flex flex-col items-center gap-1 text-[10px] font-semibold transition-all cursor-pointer text-slate-500 hover:text-slate-300">
+      <i data-lucide="file-text" class="w-5 h-5"></i>
+      <span>PDF Kitob</span>
+    </button>
+
+    <button onclick="switchTab('banner')" id="nav-banner" class="nav-btn flex flex-col items-center gap-1 text-[10px] font-semibold transition-all cursor-pointer text-slate-500 hover:text-slate-300">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span>AI Banner</span>
+    </button>
+
+    <button onclick="switchTab('planner')" id="nav-planner" class="nav-btn flex flex-col items-center gap-1 text-[10px] font-semibold transition-all cursor-pointer text-slate-500 hover:text-slate-300">
+      <i data-lucide="calendar" class="w-5 h-5"></i>
+      <span>Mundarija</span>
+    </button>
+  </nav>
+
+  <script>
+    // Sample Posts Data
+    const SAMPLE_POSTS = [
+      {
+        id: 'p1',
+        title: 'Mundarija 1: Hamiyat',
+        sarlavha: "HAMIYATLI BO'LING!",
+        matn: "Erkaklar, hamiyatli bo'ling! Ayolingiz, onangiz, qizingiz kabi mahram ayollarning ismini ham qizg'aning. Zaruratsiz ular haqida boshqalarga gapirmang! Jamiyatda iffat va hayo saqlanishi har bir insonning o'z oilasiga bo'lgan hurmatidan boshlanadi.",
+        savol: "Siz ushbu vaziyatda qanday yo'l tutgan bo'lar edingiz?",
+        hashtags: "#oila #hamiyat #tarbiya #ma'rifat",
+        image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80',
+        banner: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'p2',
+        title: 'Mundarija 2: Vaqt',
+        sarlavha: "VAQT - ENG ULUĞ NE'MAT",
+        matn: "Vaqtni behuda sarflash qalbni o'ldiradi. Har bir o'tayotgan daqiqa orqaga qaytmaydigan umr qismidir. Kuningizni ilm va ezgu amallar bilan bezang!",
+        savol: "Bugun vaqtingizni eng ko'p nimaga sarfladingiz?",
+        hashtags: "#vaqt #umr #intizom #donolik",
+        image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80',
+        banner: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'p3',
+        title: 'Mundarija 3: Ilm',
+        sarlavha: "ILM VA AMALIYOT SURI",
+        matn: "Amalsiz ilm — mevasiz daraxt kabidir. O'rgangan har bir foydali bilimingizni hayotingizda tatbiq etishga shoshiling.",
+        savol: "Oxirgi o'qigan kitobingiz hayotingizni qanday o'zgartirdi?",
+        hashtags: "#ilm #amaliyot #kitobxon #ma'rifat",
+        image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80',
+        banner: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80'
+      }
+    ];
+
+    const SLOTS = [
+      { id: 1, title: "1-Bo'lim: Hamiyatli bo'ling", time: "07:30", status: 'ready', post: SAMPLE_POSTS[0] },
+      { id: 2, title: "2-Bo'lim: Vaqt qadri", time: "12:30", status: 'scheduled', post: SAMPLE_POSTS[1] },
+      { id: 3, title: "3-Bo'lim: Ilm va Amaliyot", time: "17:30", status: 'ready', post: SAMPLE_POSTS[2] },
+      { id: 4, title: "4-Bo'lim: Sabr kaliti", time: "21:00", status: 'empty', post: null },
+      { id: 5, title: "5-Bo'lim: Saxovat odobi", time: "07:30", status: 'empty', post: null },
+      { id: 6, title: "6-Bo'lim: Kasb-hunar", time: "12:30", status: 'empty', post: null },
+      { id: 7, title: "7-Bo'lim: Ota-ona hurmati", time: "17:30", status: 'empty', post: null },
+      { id: 8, title: "8-Bo'lim: Do'stlik mezoni", time: "21:00", status: 'empty', post: null },
+      { id: 9, title: "9-Bo'lim: Kamtarinlik", time: "07:30", status: 'empty', post: null },
+      { id: 10, title: "10-Bo'lim: Xulosa", time: "12:30", status: 'empty', post: null },
+    ];
+
+    let currentPost = SAMPLE_POSTS[0];
+    let isEditing = false;
+
+    // Toast Helper
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const text = document.getElementById('toast-text');
+      const icon = document.getElementById('toast-icon');
+
+      text.innerText = msg;
+      if (type === 'error') {
+        container.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 border transition-all animate-bounce bg-rose-950/90 border-rose-500/50 text-rose-200';
+        icon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+        container.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 border transition-all animate-bounce bg-emerald-950/90 border-emerald-500/50 text-emerald-200';
+        icon.setAttribute('data-lucide', 'check-circle-2');
+      }
+
+      lucide.createIcons();
+      container.classList.remove('hidden');
+      setTimeout(() => container.classList.add('hidden'), 3000);
+    }
+
+    // Switch Tab Logic
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-sky-400', 'accent-text', 'scale-110');
+        btn.classList.add('text-slate-500');
+      });
+
+      const activeNav = document.getElementById('nav-' + tabId);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-500');
+        activeNav.classList.add('text-sky-400', 'accent-text', 'scale-110');
+      }
+    }
+
+    // Set Theme Accent
+    function setAccentTheme(color) {
+      const themeColors = {
+        sky: { text: 'text-sky-400', bg: 'bg-sky-500', gradient: 'from-sky-400 to-blue-600', badge: 'text-sky-400 border-sky-500/40' },
+        purple: { text: 'text-purple-400', bg: 'bg-purple-600', gradient: 'from-purple-500 to-indigo-600', badge: 'text-purple-400 border-purple-500/40' },
+        emerald: { text: 'text-emerald-400', bg: 'bg-emerald-600', gradient: 'from-emerald-500 to-teal-600', badge: 'text-emerald-400 border-emerald-500/40' },
+        amber: { text: 'text-amber-400', bg: 'bg-amber-600', gradient: 'from-amber-500 to-orange-600', badge: 'text-amber-400 border-amber-500/40' },
+        rose: { text: 'text-rose-400', bg: 'bg-rose-600', gradient: 'from-rose-500 to-pink-600', badge: 'text-rose-400 border-rose-500/40' }
+      };
+
+      const selected = themeColors[color];
+      
+      document.getElementById('app-logo').className = `w-11 h-11 rounded-2xl bg-gradient-to-br ${selected.gradient} flex items-center justify-center font-bold text-white shadow-lg`;
+      document.getElementById('header-glow').className = `absolute -right-8 -top-8 w-24 h-24 bg-gradient-to-br ${selected.gradient} opacity-20 rounded-full blur-2xl pointer-events-none`;
+      document.getElementById('avatar-circle').className = `w-8 h-8 rounded-full bg-gradient-to-tr ${selected.gradient} flex items-center justify-center text-white font-bold text-xs shadow-md`;
+      document.getElementById('version-badge').className = `text-[10px] bg-slate-800 ${selected.text} font-bold px-2 py-0.5 rounded-full border ${selected.badge}`;
+
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        if (btn.dataset.theme === color) {
+          btn.className = 'theme-btn w-3.5 h-3.5 rounded-full bg-' + color + '-400 scale-125 ring-2 ring-white cursor-pointer';
+        } else {
+          btn.className = 'theme-btn w-3.5 h-3.5 rounded-full opacity-50 hover:opacity-100 transition-transform cursor-pointer';
+        }
+      });
+
+      showToast(`Mavzu rangi: ${color.toUpperCase()}`);
+    }
+
+    // Load Sample Post
+    function loadSample(index) {
+      currentPost = SAMPLE_POSTS[index];
+      document.getElementById('scanned-image').src = currentPost.image;
+      document.getElementById('banner-image').src = currentPost.banner;
+
+      document.getElementById('post-title-display').innerText = currentPost.sarlavha;
+      document.getElementById('post-text-display').innerText = currentPost.matn;
+      document.getElementById('post-question-display').innerText = currentPost.savol;
+      document.getElementById('post-hashtags-display').innerText = currentPost.hashtags;
+
+      document.getElementById('input-sarlavha').value = currentPost.sarlavha;
+      document.getElementById('input-matn').value = currentPost.matn;
+      document.getElementById('input-savol').value = currentPost.savol;
+
+      document.querySelectorAll('.sample-btn').forEach((btn, idx) => {
+        if (idx === index) {
+          btn.className = "sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-sky-500 text-white border-transparent shadow";
+        } else {
+          btn.className = "sample-btn px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200";
+        }
+      });
+    }
+
+    // Trigger Scan Animation
+    function triggerScanAnimation() {
+      const line = document.getElementById('scanner-line');
+      const btn = document.getElementById('scan-btn');
+      line.classList.remove('hidden');
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>AI Sahifani tahlil qilmoqda...</span>`;
+      lucide.createIcons();
+
+      setTimeout(() => {
+        line.classList.add('hidden');
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i><span>Post Yaratish (AI OCR)</span>`;
+        lucide.createIcons();
+        showToast("AI kitob sahifasidan post va banner yaratdi!");
+      }, 1800);
+    }
+
+    // Toggle Edit Mode in Telegram Bubble
+    function toggleEditMode() {
+      isEditing = !isEditing;
+      const displayView = document.getElementById('post-display-view');
+      const editView = document.getElementById('post-edit-view');
+      const btnText = document.getElementById('edit-btn-text');
+
+      if (isEditing) {
+        displayView.classList.add('hidden');
+        editView.classList.remove('hidden');
+        btnText.innerText = "Saqlash";
+      } else {
+        currentPost.sarlavha = document.getElementById('input-sarlavha').value;
+        currentPost.matn = document.getElementById('input-matn').value;
+        currentPost.savol = document.getElementById('input-savol').value;
+
+        document.getElementById('post-title-display').innerText = currentPost.sarlavha;
+        document.getElementById('post-text-display').innerText = currentPost.matn;
+        document.getElementById('post-question-display').innerText = currentPost.savol;
+
+        displayView.classList.remove('hidden');
+        editView.classList.add('hidden');
+        btnText.innerText = "Tahrirlash";
+        showToast("O'zgarishlar saqlandi!");
+      }
+    }
+
+    // Copy Formatted Post
+    function copyPostToClipboard() {
+      const link = document.getElementById('post-link-display').innerText;
+      const textToCopy = `${currentPost.sarlavha.toUpperCase()}\n\n${currentPost.matn}\n\n❓ ${currentPost.savol}\n\n${link}\n\n${currentPost.hashtags}`;
+      
+      const el = document.createElement('textarea');
+      el.value = textToCopy;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      showToast("Post buferga nusxalandi!");
+    }
+
+    function updateChannelLink(val) {
+      document.getElementById('post-link-display').innerText = val;
+    }
+
+    function selectStyle(styleName, bannerUrl) {
+      document.getElementById('banner-image').src = bannerUrl;
+      showToast(`Banner uslubi: ${styleName.toUpperCase()} tanlandi!`);
+    }
+
+    // Render Planner Slots
+    function renderPlannerSlots() {
+      const grid = document.getElementById('planner-slots-grid');
+      grid.innerHTML = SLOTS.map(slot => `
+        <div onclick="selectSlot(${slot.id})" class="p-3 rounded-xl border flex flex-col justify-between h-20 transition-all cursor-pointer ${
+          slot.status === 'ready'
+            ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+            : slot.status === 'scheduled'
+            ? 'bg-purple-500/10 border-purple-500/40 text-purple-300'
+            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
+        }">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-xs">#${slot.id}</span>
+            <span class="text-[9px] font-mono px-1.5 py-0.5 bg-slate-900 rounded border border-slate-700">
+              ${slot.time}
+            </span>
+          </div>
+          <p class="text-[11px] font-medium truncate">${slot.title}</p>
+        </div>
+      `).join('');
+    }
+
+    function selectSlot(id) {
+      const slot = SLOTS.find(s => s.id === id);
+      if (slot && slot.post) {
+        currentPost = slot.post;
+        loadSample(id - 1);
+      }
+      switchTab('scanner');
+      showToast(`${id}-bo'lim tanlandi!`);
+    }
+
+    // Initial Load
+    window.onload = function() {
+      lucide.createIcons();
+      renderPlannerSlots();
+    };
+  </script>
+
+</body>
+</html>
