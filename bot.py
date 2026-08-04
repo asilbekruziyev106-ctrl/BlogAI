@@ -8,15 +8,41 @@ import requests
 import fitz  # PyMuPDF library PDF fayllar uchun
 import telebot
 
-# ---------------------------------------------------------------------------
-# GEMINI API (OCR, Matn, Savol va Hashtag uchun)
-# ---------------------------------------------------------------------------
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+CHANNEL_LINK = os.environ.get("CHANNEL_LINK", "📖 @RuziyevAsilbek")
+
+if not TELEGRAM_BOT_TOKEN:
+    raise ValueError("TELEGRAM_BOT_TOKEN muhit o'zgaruvchisi topilmadi!")
+
+# Bot obyektini e'lon qilish
+bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"OK - Bot is running")
+    
+    def log_message(self, format, *args):
+        return  # Server loglarini toza tutish uchun
+
+def run_health_check_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server.serve_forever()
+
+# Serverni fonda ishga tushirish (Render port binding uchun)
+health_thread = threading.Thread(target=run_health_check_server, daemon=True)
+health_thread.start()
+
 def process_image_with_gemini(image_bytes):
     """
     Rasm yoki PDF sahifasidan matn o'qiydi, sarlavhani ajratadi,
     o'zidan gap qo'shmasdan lotincha matn va postga oid savol yaratadi.
     """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
     
     base64_img = base64.b64encode(image_bytes).decode('utf-8')
 
@@ -79,9 +105,6 @@ def process_image_with_gemini(image_bytes):
     else:
         raise Exception(f"Gemini API xatoligi: {response.text}")
 
-# ---------------------------------------------------------------------------
-# IMAGEN API (Banner Rasm Generatsiyasi)
-# ---------------------------------------------------------------------------
 def generate_banner_image(prompt_text):
     """Sarlavhaga mos grafik banner yaratadi"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key={GEMINI_API_KEY}"
@@ -98,9 +121,6 @@ def generate_banner_image(prompt_text):
         pass
     return None
 
-# ---------------------------------------------------------------------------
-# TELEGRAM BOT HANDLERLARI
-# ---------------------------------------------------------------------------
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(
@@ -115,14 +135,11 @@ def send_welcome(message):
 def handle_photo(message):
     status_msg = bot.reply_to(message, "⏳ Rasm tahlil qilinmoqda, kuting...")
     try:
-        # Rasmni yuklab olish
         file_info = bot.get_file(message.photo[-1].file_id)
         downloaded_file = bot.download_file(file_info.file_path)
 
-        # Gemini API ga yuborish
         data = process_image_with_gemini(downloaded_file)
 
-        # Post tekstini shakllantirish
         caption_text = (
             f"<b>{data['sarlavha'].upper()}</b>\n\n"
             f"{data['matn']}\n\n"
@@ -133,7 +150,6 @@ def handle_photo(message):
 
         bot.delete_message(message.chat.id, status_msg.message_id)
 
-        # Banner kerak bo'lsa Imagen orqali rasm yaratish
         if data.get('needsBanner') and data.get('bannerPrompt'):
             banner_status = bot.send_message(message.chat.id, "🎨 Sarlavhaga mos dizayn rasm yaratilmoqda...")
             banner_bytes = generate_banner_image(data['bannerPrompt'])
@@ -143,7 +159,6 @@ def handle_photo(message):
                 bot.send_photo(message.chat.id, banner_bytes, caption=caption_text, parse_mode="HTML")
                 return
 
-        # Banner kerak bo'lmasa yozuvning o'zini yuborish
         bot.send_message(message.chat.id, caption_text, parse_mode="HTML")
 
     except Exception as e:
@@ -161,7 +176,6 @@ def handle_document(message):
         file_info = bot.get_file(message.document.file_id)
         pdf_bytes = bot.download_file(file_info.file_path)
 
-        # PDF dan 1-sahifani rasmga aylantirish
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         page = doc.load_page(0)
         pix = page.get_pixmap(dpi=150)
